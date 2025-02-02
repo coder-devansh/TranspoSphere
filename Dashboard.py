@@ -316,7 +316,7 @@ def main():
             <span>Transport Dashboard</span>
         </div>
     </div>
-    """.format(base64_image), unsafe_allow_html=True)
+    """, unsafe_allow_html=True)
 
     # Navigation using st.session_state
     col1, col2, col3, col4 = st.columns(4)
