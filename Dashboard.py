@@ -3,22 +3,16 @@ import pandas as pd
 import folium
 from streamlit_folium import folium_static
 import plotly.express as px
-import base64
 
 # Function to convert local image file to base64
-def image_to_base64(image_path):
-    with open(image_path, "rb") as image_file:
-        return base64.b64encode(image_file.read()).decode()
 
-# Convert the local image to base64
-image_path = "Track_Category.png"  # Path to your local image
-base64_image = image_to_base64(image_path)
-base64_icon = f"data:image/png;base64,{base64_image}"
+
+
 
 # Set page config with base64 image as page icon
 st.set_page_config(
     page_title="🚌Transport Dashboard",
-    page_icon=f"<img src='{base64_icon}' width='50' height='50'/>",  # Use base64 string as the image source
+   
     layout="wide"
 )
 
