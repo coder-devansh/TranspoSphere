@@ -3,3 +3,4 @@ streamlit
 pandas
 plotly
 streamlit-folium
+base64
