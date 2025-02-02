@@ -1,0 +1,222 @@
+import streamlit as st
+import pandas as pd
+import folium
+from streamlit_folium import folium_static
+
+import matplotlib.pyplot as plt
+
+# Set page config
+st.set_page_config(
+    page_title="Transport Dashboard",
+    page_icon="🚌",
+    layout="wide"
+)
+
+# Custom CSS for styling
+st.markdown(
+    """
+    <style>
+    .stApp {
+        background-color: #203b56;
+        color: white;
+    }
+    .stButton>button {
+        background-color: #4CAF50;
+        color: white;
+        border-radius: 5px;
+        padding: 10px 20px;
+        font-size: 16px;
+    }
+    .stTextInput>div>div>input {
+        background-color: #2c4a6e;
+        color: white;
+    }
+    .stTable {
+        background-color: #2c4a6e;
+        color: white;
+    }
+    .stProgress>div>div>div {
+        background-color: #4CAF50;
+    }
+    .css-1aumxhk {
+        color: white;
+    }
+    .top-nav {
+        display: flex;
+        justify-content: space-around;
+        background-color: #2c4a6e;
+        padding: 10px;
+        border-radius: 5px;
+        margin-bottom: 20px;
+    }
+    .top-nav button {
+        background-color: #4CAF50;
+        color: white;
+        border: none;
+        padding: 10px 20px;
+        border-radius: 5px;
+        cursor: pointer;
+    }
+    .top-nav button:hover {
+        background-color: #45a049;
+    }
+    </style>
+    """,
+    unsafe_allow_html=True
+)
+
+# Initialize session state for page navigation
+if "page" not in st.session_state:
+    st.session_state.page = "live_tracker"
+
+# Live Tracker Page
+def live_tracker():
+    st.title("🚌 Live Tracker")
+    
+    # Create a map centered on a city (e.g., New York)
+    india_coords = [20.5937, 78.9629]  # Center of India (latitude, longitude)
+    m = folium.Map(location=india_coords, zoom_start=5)  # Adjust zoom level to fit India
+
+    # Add example markers (can be adjusted to specific cities in India)
+    folium.Marker([28.6139, 77.2090], popup="Bus 101 - New Delhi", icon=folium.Icon(color="blue")).add_to(m)
+    folium.Marker([19.0760, 72.8777], popup="Train A - Mumbai", icon=folium.Icon(color="red")).add_to(m)
+    folium.Marker([12.9716, 77.5946], popup="Metro M1 - Bangalore", icon=folium.Icon(color="green")).add_to(m)
+    # Create pie chart data
+    transport_data = {"Bus": 60, "Train": 25, "Metro": 15}
+    labels = list(transport_data.keys())
+    sizes = list(transport_data.values())
+    colors = ['#66b3ff', '#ff6666', '#99ff99']
+    
+    # Pie chart plotting
+    fig, ax = plt.subplots(figsize=(4, 5))
+    ax.pie(sizes, labels=labels, colors=colors, autopct='%1.1f%%', startangle=90, wedgeprops={'edgecolor': 'black'})
+    ax.axis('equal')  # Equal aspect ratio ensures that pie is drawn as a circle.
+
+    # Display the map and pie chart side by side
+    col1, col2 = st.columns([1, 1])  # 2:1 ratio for the map and pie chart
+    
+    with col1:
+        # Display the map
+        folium_static(m, width=700, height=800) 
+    
+    with col2:
+        # Display the pie chart
+        st.pyplot(fig)
+# Route & Schedule Page
+def route_schedule():
+    st.title("🗺 Route & Schedule")
+    
+    # Input fields for "From" and "To"
+    col1, col2 = st.columns(2)
+    with col1:
+        from_location = st.text_input("From", placeholder="Enter starting location")
+    with col2:
+        to_location = st.text_input("To", placeholder="Enter destination")
+    
+    # Example route data
+    routes = [
+        {"Transport": "Bus + Metro", "Time": "45 mins", "Cost": "$2.50"},
+        {"Transport": "Train + Walking", "Time": "35 mins", "Cost": "$3.00"},
+        {"Transport": "Bus Only", "Time": "55 mins", "Cost": "$1.75"},
+    ]
+    
+    # Display route options
+    st.write("### Route Options")
+    for route in routes:
+        st.write(f"{route['Transport']} - {route['Time']} - {route['Cost']}")
+    
+    # Example timetable
+    st.write("### Timetable")
+    timetable = pd.DataFrame({
+        "Time": ["8:00 AM", "8:15 AM", "8:30 AM"],
+        "Route": ["Bus 101", "Train A", "Metro M1"],
+        "Status": ["On Time", "Delayed", "On Time"]
+    })
+    st.table(timetable)
+
+# Crowd Insights Page
+def crowd_insights():
+    st.title("👥 Crowd Insights")
+    
+    # Example crowd data
+    crowd_data = {
+        "Transport": ["Bus 101", "Train A", "Metro M1"],
+        "Crowd Level": ["High", "Medium", "Low"],
+        "Trend": ["Getting busier", "Stable", "Getting quieter"]
+    }
+
+    # Display the crowd levels as a table
+    st.write("### Crowd Levels")
+    crowd_df = pd.DataFrame(crowd_data)
+    st.table(crowd_df)
+    
+    # Bar graph to represent crowd levels
+    crowd_level_mapping = {"High": 3, "Medium": 2, "Low": 1}  # Assigning numeric values to crowd levels for graphing
+    crowd_df["Crowd Level Numeric"] = crowd_df["Crowd Level"].map(crowd_level_mapping)
+
+    st.write("### Crowd Levels Visualization")
+    st.bar_chart(crowd_df.set_index('Transport')['Crowd Level Numeric'])
+    
+    # Tips section
+    st.write("### Tips")
+    st.write("Try the 8:15 AM train for a quieter ride.")
+
+
+# Eco Impact Page
+def eco_impact():
+    st.title("🌍 Eco Impact")
+    
+    # Personal impact metrics
+    st.write("### Personal Impact")
+    st.write("CO2 Saved: *12 kg* this week")
+    st.write("Fuel Saved: *10 liters*")
+    st.progress(0.8)  # Monthly eco goal progress
+    
+    # Community impact
+    st.write("### Community Impact")
+    st.write("Total CO2 saved by all users this month: *1,000 kg*")
+    
+    # Leaderboard
+    st.write("### Top Eco-Friendly Commuters")
+    leaderboard = pd.DataFrame({
+        "Name": ["Alice", "Bob", "Charlie"],
+        "CO2 Saved (kg)": [50, 45, 40]
+    })
+    st.table(leaderboard)
+    
+    # Fun fact
+    st.write("### Fun Fact")
+    st.write("Taking the bus reduces emissions by 45% compared to driving.")
+
+# Main App
+def main():
+    # Add a header for the website name on the first page
+    st.markdown("<h1 style='text-align: center;'>Ride in Real Time🚌</h1>", unsafe_allow_html=True)
+
+    # Top Navigation Bar
+    col1, col2, col3, col4 = st.columns(4)
+    with col1:
+        if st.button("Live Tracker"):
+            st.session_state.page = "live_tracker"
+    with col2:
+        if st.button("Route & Schedule"):
+            st.session_state.page = "route_schedule"
+    with col3:
+        if st.button("Crowd Insights"):
+            st.session_state.page = "crowd_insights"
+    with col4:
+        if st.button("Eco Impact"):
+            st.session_state.page = "eco_impact"
+
+    # Page selection logic
+    if st.session_state.page == "live_tracker":
+        live_tracker()
+    elif st.session_state.page == "route_schedule":
+        route_schedule()
+    elif st.session_state.page == "crowd_insights":
+        crowd_insights()
+    elif st.session_state.page == "eco_impact":
+        eco_impact()
+
+if __name__ == "__main__":
+    main()
